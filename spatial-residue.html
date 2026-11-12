@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archit. Un / Spatial Residue Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #ffffff;
+  --bg2:       #f7f7f7;
+  --bg3:       #f2f2f2;
+  --card:      #ffffff;
+  --border:    rgba(0,0,0,0.09);
+  --text:      #111111;
+  --muted:     #666;
+  --dim:       #999;
+
+  --purple:    #4a7fa5;
+  --purple-l:  #9bbfd4;
+  --purple-bg: rgba(74,127,165,0.10);
+  --teal:      #7a9e3b;
+  --teal-l:    #a8c870;
+  --teal-bg:   rgba(122,158,59,0.10);
+  --amber:     #c8883a;
+  --amber-bg:  rgba(200,136,58,0.10);
+  --coral:     #b05a3a;
+  --coral-bg:  rgba(176,90,58,0.10);
+  --blue:      #3a7878;
+  --blue-bg:   rgba(58,120,120,0.10);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+
+/* ── HERO ── */
+.hero {
+  padding: 80px 48px 64px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(16px,2vw,32px);
+  align-items: end;
+}
+.hero-eyebrow {
+  font-size: clamp(8px,0.75vw,9px); font-weight: 600; letter-spacing: 0.24em;
+  text-transform: uppercase; color: var(--purple); margin-bottom: 16px;
+}
+.hero-title {
+  font-family: 'Roboto', sans-serif; font-weight: 900;
+  font-size: clamp(28px, 5vw, 90px);
+  line-height: 0.88; letter-spacing: 0.01em;
+  color: var(--text);
+}
+.hero-title span { color: var(--purple); }
+.hero-sub {
+  font-size: 12px; font-weight: 300; color: var(--muted);
+  max-width: 560px; line-height: 1.75; margin-top: 28px;
+  border-left: 2px solid var(--purple);
+  padding-left: 14px;
+}
+.hero-stats {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 8px;
+  align-self: end;
+}
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.stat-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.stat-val { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: clamp(20px,2.8vw,36px); line-height: 0.9; color: var(--text); }
+.stat-val.accent-purple { color: var(--purple); }
+.stat-val.accent-teal { color: var(--teal); }
+.stat-sub { font-size: 11px; color: var(--dim); margin-top: 5px; }
+
+/* ── PAGE SECTIONS ── */
+.page-section {
+  padding: clamp(20px,2.5vw,40px) clamp(16px,2.5vw,36px);
+  border-bottom: 1px solid var(--border);
+  opacity: 0; transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.page-section.visible { opacity: 1; transform: translateY(0); }
+
+.sec-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 24px; gap: 14px;
+}
+.sec-index { font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 6px; }
+.sec-title { font-family: 'Roboto', sans-serif; font-weight: 900; text-transform: uppercase; font-size: clamp(22px, 3.2vw, 42px); line-height: 0.9; letter-spacing: 0.02em; color: var(--text); }
+.sec-desc { font-size: 11px; font-weight: 300; color: var(--muted); text-align: right; max-width: 240px; line-height: 1.65; }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: clamp(10px,1.4vw,16px) clamp(10px,1.4vw,18px);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  min-width: 0;
+  overflow: hidden;
+}
+.card-label {
+  font-size: clamp(8px,0.75vw,9px); font-weight: 600; letter-spacing: 0.18em;
+  text-transform: uppercase; margin-bottom: 18px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+}
+
+/* ── GRID LAYOUTS ── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 0; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; min-width: 0; overflow: hidden; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; min-width: 0; }
+
+/* ── BAR ROWS ── */
+.bar-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.bar-row:last-of-type { border-bottom: none; }
+.br-label { font-size: clamp(9px,1vw,11px); font-weight: 400; color: var(--muted); flex: 1; min-width: 0; }
+.br-track { width: clamp(50px,8vw,90px); height: 4px; background: rgba(0,0,0,0.07); border-radius: 3px; flex-shrink: 0; }
+.br-fill { height: 4px; border-radius: 2px; width: 0; transition: width 0.9s cubic-bezier(0.16,1,0.3,1); }
+.br-num { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: clamp(13px,1.4vw,17px); line-height: 1; min-width: 28px; text-align: right; }
+
+/* ── DOT GRID ── */
+.dot-grid { display: grid; grid-template-columns: repeat(9,1fr); gap: 5px; margin: 4px 0 14px; }
+.dot { width: 100%; aspect-ratio: 1; border-radius: 50%; }
+.dot.empty   { background: var(--purple); }
+.dot.partial { background: var(--purple); opacity: 0.3; }
+.dot.present { background: transparent; border: 2px solid var(--purple); }
+
+.e-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.e-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.e-label { font-size: 11px; color: var(--muted); flex: 1; }
+.e-num { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: 24px; color: var(--text); line-height: 1; }
+
+/* ── COLOUR SWATCHES ── */
+.swatch-col { display: flex; flex-direction: column; gap: 6px; }
+.swatch-row { display: flex; gap: 4px; align-items: center; }
+.swatch { height: 24px; border-radius: 4px; }
+.sw-label { font-size: 10px; color: var(--dim); letter-spacing: 0.06em; margin-left: 8px; }
+
+/* ── PILLS ── */
+.pill-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+.pill {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 14px;
+}
+.pill-purple { background: var(--purple-bg); color: var(--purple-l); border: 1px solid rgba(74,127,165,0.25); }
+.pill-teal   { background: var(--teal-bg);   color: var(--teal-l);   border: 1px solid rgba(122,158,59,0.25); }
+.pill-amber  { background: var(--amber-bg);  color: var(--amber);    border: 1px solid rgba(200,136,58,0.25); }
+.pill-dim    { background: rgba(255,255,255,0.05); color: var(--dim); border: 1px solid var(--border); }
+
+/* ── PULL QUOTE ── */
+.pull { font-size: 12px; font-weight: 300; font-style: italic; color: var(--dim); line-height: 1.7; border-left: 2px solid var(--purple); padding-left: 14px; margin-top: 18px; }
+
+/* ── THEME BLOCKS ── */
+.t-block { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.t-block:last-child { border-bottom: none; }
+.t-num { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: 20px; color: var(--purple); line-height: 1.1; }
+.t-title { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); margin-bottom: 4px; }
+.t-text { font-size: 11px; font-weight: 300; color: var(--muted); line-height: 1.6; }
+
+/* ── CLUSTER CARDS ── */
+.cluster {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+}
+.c-name { font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.c-items { font-size: 10px; color: var(--muted); line-height: 1.6; }
+.c-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.ctag { font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; background: var(--teal-bg); color: var(--teal-l); border-radius: 4px; padding: 3px 8px; }
+
+/* ── METRIC TICKER ── */
+.metrics-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.m-item { padding: 14px 18px; border-right: 1px solid var(--border); }
+.m-item:last-child { border-right: none; }
+.m-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.m-val { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: 30px; line-height: 0.9; }
+.m-sub { font-size: 11px; color: var(--dim); margin-top: 4px; }
+
+/* ── CHART CANVAS ── */
+.chart-wrap { position: relative; width: 100%; }
+
+/* ── FOOTER ── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 12px clamp(16px,3vw,40px);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-l { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.footer-r { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: 18px; letter-spacing: 0.06em; color: var(--muted); }
+
+/* ── GEO GRID ── */
+.geo-grid { display: flex; flex-wrap: wrap; gap: 0; }
+.geo-item { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.geo-item:nth-child(odd) { padding-right: 20px; border-right: 1px solid rgba(255,255,255,0.05); }
+
+.geo-name { font-size: 11px; color: var(--muted); flex: 1; }
+.geo-num { font-family: 'Roboto', sans-serif; font-weight: 900; font-size: 20px; color: var(--text); line-height: 1; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes fillBar {
+    from { width: 0 !important; }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes drawDot {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+  }
+  @keyframes radarDraw {
+    from { opacity: 0; clip-path: circle(0% at 50% 50%); }
+    to   { opacity: 1; clip-path: circle(100% at 50% 50%); }
+  }
+  @keyframes barGrow {
+    from { transform: scaleY(0); transform-origin: bottom; }
+    to   { transform: scaleY(1); transform-origin: bottom; }
+  }
+  @keyframes sectionLine {
+    from { transform: scaleX(0); transform-origin: left; }
+    to   { transform: scaleX(1); transform-origin: left; }
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(74,127,165,0); }
+    50%       { box-shadow: 0 0 0 6px rgba(74,127,165,0.08); }
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .page-section {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.65s cubic-bezier(0.16,1,0.3,1),
+                transform 0.65s cubic-bezier(0.16,1,0.3,1);
+  }
+  .page-section.animating-in {
+    animation: sectionReveal 0.65s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes sectionReveal {
+    from { opacity: 0.3; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero {
+    animation: fadeIn 0.9s ease both;
+  }
+
+  /* ── BAR FILL ANIMATION ── */
+  .br-fill {
+    width: 0;
+    transition: width 1s cubic-bezier(0.16,1,0.3,1);
+  }
+  .page-section.visible .br-fill {
+    /* width set by inline style via JS */
+  }
+
+  /* ── SVG BAR CHART RECTS ── */
+  .anim-bar {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform 0.7s cubic-bezier(0.16,1,0.3,1);
+  }
+  .page-section.visible .anim-bar {
+    transform: scaleY(1);
+  }
+
+  /* ── STAGGERED DELAYS for bar rows ── */
+  .bar-row:nth-child(1) .br-fill { transition-delay: 0.05s; }
+  .bar-row:nth-child(2) .br-fill { transition-delay: 0.12s; }
+  .bar-row:nth-child(3) .br-fill { transition-delay: 0.19s; }
+  .bar-row:nth-child(4) .br-fill { transition-delay: 0.26s; }
+  .bar-row:nth-child(5) .br-fill { transition-delay: 0.33s; }
+  .bar-row:nth-child(6) .br-fill { transition-delay: 0.40s; }
+  .bar-row:nth-child(7) .br-fill { transition-delay: 0.47s; }
+
+  /* ── DOT GRID ANIMATION — handled by JS ── */
+
+  /* ── RADAR SVG FADE IN ── */
+  .page-section.visible svg polygon[fill*="rgba"] {
+    animation: fadeIn 1.2s ease 0.3s both;
+  }
+  .page-section.visible svg polygon[stroke="#4a7fa5"] {
+    stroke-dasharray: 800;
+    stroke-dashoffset: 800;
+    animation: drawStroke 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+  }
+  @keyframes drawStroke {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ── SVG TIMELINE BARS ── */
+  .page-section.visible svg rect.tbar {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    transform: scaleY(0);
+    animation: barGrow 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+
+  /* ── CARD HOVER ── */
+  .card {
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    cursor: default;
+  }
+  .card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+    transform: translateY(-2px);
+  }
+
+  /* ── BAR ROW HOVER ── */
+  .bar-row {
+    transition: background 0.2s ease;
+    border-radius: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-left: -4px;
+    margin-right: -4px;
+  }
+  .bar-row:hover {
+    background: rgba(0,0,0,0.025);
+  }
+  .bar-row:hover .br-num {
+    transform: scale(1.08);
+    transition: transform 0.2s ease;
+  }
+  .br-num {
+    transition: transform 0.2s ease;
+  }
+
+  /* ── DOT HOVER ── */
+  .dot {
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), filter 0.2s ease;
+    cursor: pointer;
+  }
+  .dot:hover {
+    filter: brightness(1.25);
+    transform: scale(1.25) !important;
+  }
+
+  /* ── CLUSTER CARD HOVER ── */
+  .cluster {
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: default;
+  }
+  .cluster:hover {
+    border-color: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(122,158,59,0.12);
+  }
+
+  /* ── PILL HOVER ── */
+  .pill {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+  }
+  .pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  /* ── STAT CARD HOVER ── */
+  .stat-card {
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+    cursor: default;
+  }
+  .stat-card:hover {
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+
+  /* ── SWATCH HOVER ── */
+  .swatch {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: crosshair;
+  }
+  .swatch:hover {
+    transform: scaleY(1.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  /* ── SECTION HEADER LINE ANIMATE ── */
+  .sec-header {
+    border-bottom: 2px solid var(--black);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── THEME BLOCK HOVER ── */
+  .t-block {
+    transition: background 0.2s ease;
+    border-radius: 4px;
+    margin: 0 -8px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .t-block:hover {
+    background: rgba(74,127,165,0.04);
+  }
+
+  /* ── SVG DONUT HOVER ── */
+  svg path[fill="#4a7fa5"]:hover,
+  svg path[fill="#7a9e3b"]:hover,
+  svg path[fill="#c8883a"]:hover {
+    opacity: 1 !important;
+    filter: brightness(1.1);
+    cursor: pointer;
+  }
+  svg path {
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  /* ── COLOUR SWATCH BARS HOVER ── */
+  svg rect[fill="#4a7fa5"],
+  svg rect[fill="#a8a69e"],
+  svg rect[fill="#c8c4bc"],
+  svg rect[fill="#7a9e3b"],
+  svg rect[fill="#c8883a"],
+  svg rect[fill="#3a7878"],
+  svg rect[fill="#b05a3a"] {
+    transition: opacity 0.2s ease;
+  }
+  svg rect:hover {
+    opacity: 1 !important;
+    cursor: pointer;
+  }
+
+  /* ── PULL QUOTE ANIMATE ── */
+  .pull {
+    opacity: 1;
+    transition: opacity 0.8s ease;
+  }
+
+  /* ── SECTION INDEX FADE ── */
+  .sec-index {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  /* ── CARD LABEL ANIMATE ── */
+  .card-label {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  /* ── GEO NUM HOVER ── */
+  .geo-item {
+    transition: background 0.2s ease;
+    border-radius: 4px;
+    margin: 0 -6px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .geo-item:hover {
+    background: rgba(0,0,0,0.03);
+  }
+  .geo-num {
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+  .geo-item:hover .geo-num {
+    transform: scale(1.1);
+    color: var(--purple);
+  }
+
+
+  /* ── GLOW EFFECTS ── */
+
+  /* Coloured numbers glow */
+  .stat-val.accent-purple {
+    color: var(--purple);
+    text-shadow: 0 0 18px rgba(74,127,165,0.5), 0 0 40px rgba(74,127,165,0.2);
+  }
+  .stat-val.accent-teal {
+    color: var(--teal);
+    text-shadow: 0 0 18px rgba(122,158,59,0.5), 0 0 40px rgba(122,158,59,0.2);
+  }
+
+  /* Stat card glow on hover */
+  .stat-card:hover {
+    box-shadow: 0 4px 24px rgba(74,127,165,0.18), 0 0 0 1px rgba(74,127,165,0.12);
+    transform: translateY(-2px);
+  }
+
+  /* Bar number glow — each colour family */
+  .br-num[style*="--purple"],
+  .br-num[style*="4a7fa5"] { text-shadow: 0 0 12px rgba(74,127,165,0.6); }
+  .br-num[style*="--teal"],
+  .br-num[style*="7a9e3b"] { text-shadow: 0 0 12px rgba(122,158,59,0.6); }
+  .br-num[style*="--amber"],
+  .br-num[style*="c8883a"] { text-shadow: 0 0 12px rgba(200,136,58,0.6); }
+  .br-num[style*="--coral"],
+  .br-num[style*="b05a3a"] { text-shadow: 0 0 12px rgba(176,90,58,0.6); }
+  .br-num[style*="--blue"],
+  .br-num[style*="3a7878"] { text-shadow: 0 0 12px rgba(58,120,120,0.6); }
+
+  /* Card label glow */
+  .card-label[style*="--purple"] { text-shadow: 0 0 10px rgba(74,127,165,0.4); }
+  .card-label[style*="--teal"]   { text-shadow: 0 0 10px rgba(122,158,59,0.4); }
+  .card-label[style*="--amber"]  { text-shadow: 0 0 10px rgba(200,136,58,0.4); }
+  .card-label[style*="--coral"]  { text-shadow: 0 0 10px rgba(176,90,58,0.4); }
+  .card-label[style*="--blue"]   { text-shadow: 0 0 10px rgba(58,120,120,0.4); }
+
+  /* Sec index glow */
+  .sec-index[style*="--purple"] { text-shadow: 0 0 10px rgba(74,127,165,0.5); }
+  .sec-index[style*="--teal"]   { text-shadow: 0 0 10px rgba(122,158,59,0.5); }
+  .sec-index[style*="--amber"]  { text-shadow: 0 0 10px rgba(200,136,58,0.5); }
+  .sec-index[style*="--coral"]  { text-shadow: 0 0 10px rgba(176,90,58,0.5); }
+  .sec-index[style*="--blue"]   { text-shadow: 0 0 10px rgba(58,120,120,0.5); }
+
+  /* Bar fill glow */
+  .br-fill { filter: drop-shadow(0 0 3px currentColor); }
+
+  /* Card border glow on hover — colour matched */
+  #s1 .card:hover { box-shadow: 0 4px 20px rgba(74,127,165,0.14), 0 0 0 1px rgba(74,127,165,0.1); }
+  #s2 .card:hover { box-shadow: 0 4px 20px rgba(122,158,59,0.14), 0 0 0 1px rgba(122,158,59,0.1); }
+  #s3 .card:hover { box-shadow: 0 4px 20px rgba(200,136,58,0.14), 0 0 0 1px rgba(200,136,58,0.1); }
+  #s4 .card:hover { box-shadow: 0 4px 20px rgba(176,90,58,0.14),  0 0 0 1px rgba(176,90,58,0.1); }
+  #s5 .card:hover { box-shadow: 0 4px 20px rgba(58,120,120,0.14), 0 0 0 1px rgba(58,120,120,0.1); }
+  #s6 .card:hover { box-shadow: 0 4px 20px rgba(74,127,165,0.14), 0 0 0 1px rgba(74,127,165,0.1); }
+
+  /* Dot glow */
+  .dot.empty   { filter: drop-shadow(0 0 4px rgba(74,127,165,0.55)) drop-shadow(0 0 10px rgba(74,127,165,0.2)); }
+  .dot.partial { filter: drop-shadow(0 0 3px rgba(74,127,165,0.25)); }
+  .dot:hover   { filter: drop-shadow(0 0 8px rgba(74,127,165,0.8)) drop-shadow(0 0 16px rgba(74,127,165,0.4)) !important; }
+
+  /* Pill glow */
+  .pill-purple { box-shadow: 0 0 8px rgba(74,127,165,0.3),  inset 0 0 8px rgba(74,127,165,0.06); }
+  .pill-teal   { box-shadow: 0 0 8px rgba(122,158,59,0.3),  inset 0 0 8px rgba(122,158,59,0.06); }
+  .pill-amber  { box-shadow: 0 0 8px rgba(200,136,58,0.3),  inset 0 0 8px rgba(200,136,58,0.06); }
+
+  /* Cluster card glow on hover */
+  .cluster:hover {
+    border-color: var(--teal);
+    box-shadow: 0 4px 20px rgba(122,158,59,0.18), 0 0 12px rgba(122,158,59,0.1);
+  }
+
+  /* t-num glow */
+  .t-num { text-shadow: 0 0 10px rgba(74,127,165,0.5); }
+
+  /* e-num glow */
+  .e-num[style*="--purple"] { text-shadow: 0 0 10px rgba(74,127,165,0.5); }
+
+  /* geo-num hover glow */
+  .geo-item:hover .geo-num {
+    color: var(--purple);
+    text-shadow: 0 0 10px rgba(74,127,165,0.5);
+  }
+
+  /* Pull quote border glow */
+  .pull { border-left: 2px solid var(--purple); box-shadow: -3px 0 10px rgba(74,127,165,0.2); }
+
+  /* Radar data polygon glow */
+  #radar-svg polygon[fill*="rgba(74"] {
+    filter: drop-shadow(0 0 6px rgba(74,127,165,0.4));
+  }
+
+  /* Hero title accent word glow */
+  .hero-title span {
+    text-shadow: 0 0 30px rgba(74,127,165,0.35), 0 0 60px rgba(74,127,165,0.15);
+  }
+
+  /* Section title subtle glow on hover */
+  .page-section:hover .sec-title {
+    text-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+
+</style>
+</head>
+<body>
+
+
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow">Image Curation / Analysis</div>
+    <div class="hero-title">SPATIAL<br><span>RESIDUE</span></div>
+    <div class="hero-sub">A data analysis of 27 curated spatial images from 1991–2009: architecture, music cover art, fashion editorials mapped across colour, composition, motif and cultural origin to reveal the aesthetic grammar of the dreamscape.</div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="stat-label">Images catalogued</div><div class="stat-val accent-purple">27</div><div class="stat-sub">across 6 pages</div></div>
+    <div class="stat-card"><div class="stat-label">Year range</div><div class="stat-val accent-teal">18</div><div class="stat-sub">1991 / 2009</div></div>
+    <div class="stat-card"><div class="stat-label">Peak year</div><div class="stat-val">2002</div><div class="stat-sub">7 images</div></div>
+    <div class="stat-card"><div class="stat-label">Media formats</div><div class="stat-val">5</div><div class="stat-sub">arch · music · fashion · print</div></div>
+  </div>
+</div>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 1: TEMPORAL -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s1">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--purple);">01 / Temporal</div><div class="sec-title">DISTRIBUTION</div></div>
+    <div class="sec-desc">Images concentrated in 1997–2004, peaking at 2002 with 7 images, the height of Y2K spatial aesthetics.</div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-label" style="color:var(--purple);">Images per year / 1991 to 2009</div>
+      <div style="padding:8px 0 0;">
+        <svg viewBox="0 0 620 200" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <!-- y gridlines -->
+          <line x1="30" y1="20" x2="620" y2="20" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="30" y1="60" x2="620" y2="60" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="30" y1="100" x2="620" y2="100" stroke="#f0f0f0" stroke-width="1"/>
+          <line x1="30" y1="140" x2="620" y2="140" stroke="#f0f0f0" stroke-width="1"/>
+          <!-- baseline -->
+          <line x1="30" y1="160" x2="620" y2="160" stroke="#ddd" stroke-width="1"/>
+          <!-- y labels -->
+          <text x="22" y="163" text-anchor="end" font-family="Inter,sans-serif" font-size="9" fill="#999">0</text>
+          <text x="22" y="143" text-anchor="end" font-family="Inter,sans-serif" font-size="9" fill="#999">1</text>
+          <text x="22" y="103" text-anchor="end" font-family="Inter,sans-serif" font-size="9" fill="#999">3</text>
+          <text x="22" y="63"  text-anchor="end" font-family="Inter,sans-serif" font-size="9" fill="#999">5</text>
+          <text x="22" y="23"  text-anchor="end" font-family="Inter,sans-serif" font-size="9" fill="#999">7</text>
+          <!-- bars: data=[1,0,0,1,1,1,2,2,2,4,4,7,3,3,0,0,0,1,1], max=7, height=140px -->
+          <!-- bar width=22, gap=8, start x=32 -->
+          <rect class="tbar" x="32"  y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="62"  y="160" width="22" height="0"   fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="92"  y="160" width="22" height="0"   fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="122" y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="152" y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="182" y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="212" y="120" width="22" height="40"  fill="rgba(74,127,165,0.5)"/>
+          <rect class="tbar" x="242" y="120" width="22" height="40"  fill="rgba(74,127,165,0.5)"/>
+          <rect class="tbar" x="272" y="120" width="22" height="40"  fill="rgba(74,127,165,0.5)"/>
+          <rect class="tbar" x="302" y="80"  width="22" height="80"  fill="rgba(74,127,165,0.7)"/>
+          <rect class="tbar" x="332" y="80"  width="22" height="80"  fill="rgba(74,127,165,0.7)"/>
+          <rect class="tbar" x="362" y="20"  width="22" height="140" fill="#4a7fa5"/>
+          <rect class="tbar" x="392" y="100" width="22" height="60"  fill="rgba(74,127,165,0.6)"/>
+          <rect class="tbar" x="422" y="100" width="22" height="60"  fill="rgba(74,127,165,0.6)"/>
+          <rect class="tbar" x="452" y="160" width="22" height="0"   fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="482" y="160" width="22" height="0"   fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="512" y="160" width="22" height="0"   fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="542" y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <rect class="tbar" x="572" y="140" width="22" height="20"  fill="rgba(74,127,165,0.4)"/>
+          <!-- value labels on non-zero bars -->
+          <text x="43"  y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <text x="133" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <text x="163" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <text x="193" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <text x="223" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">2</text>
+          <text x="253" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">2</text>
+          <text x="283" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">2</text>
+          <text x="313" y="75"  text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">4</text>
+          <text x="343" y="75"  text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">4</text>
+          <text x="373" y="15"  text-anchor="middle" font-family="Roboto,sans-serif" font-size="11" font-weight="900" fill="#4a7fa5">7</text>
+          <text x="403" y="95"  text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">3</text>
+          <text x="433" y="95"  text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">3</text>
+          <text x="553" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <text x="583" y="135" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#888">1</text>
+          <!-- x labels -->
+          <text x="43"  y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'91</text>
+          <text x="73"  y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'92</text>
+          <text x="103" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'93</text>
+          <text x="133" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'94</text>
+          <text x="163" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'95</text>
+          <text x="193" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'96</text>
+          <text x="223" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'97</text>
+          <text x="253" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'98</text>
+          <text x="283" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'99</text>
+          <text x="313" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'00</text>
+          <text x="343" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'01</text>
+          <text x="373" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#4a7fa5" font-weight="500">'02</text>
+          <text x="403" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'03</text>
+          <text x="433" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'04</text>
+          <text x="463" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'05</text>
+          <text x="493" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'06</text>
+          <text x="523" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'07</text>
+          <text x="553" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'08</text>
+          <text x="583" y="175" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#bbb">'09</text>
+        </svg>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--teal);">By media type</div>
+      <div style="display:flex;align-items:center;gap:24px;padding:16px 0 8px;">
+        <svg id="donut-svg" viewBox="0 0 160 160" width="120" height="120" style="flex-shrink:0;"></svg>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:#4a7fa5;flex-shrink:0;"></div><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:300;color:#555;">Architecture / interior <strong style="font-weight:600;color:#111;margin-left:4px;">14</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:#7a9e3b;flex-shrink:0;"></div><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:300;color:#555;">Music cover art <strong style="font-weight:600;color:#111;margin-left:4px;">8</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:#c8883a;flex-shrink:0;"></div><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:300;color:#555;">Fashion / editorial <strong style="font-weight:600;color:#111;margin-left:4px;">4</strong></span></div>
+          <div style="display:flex;align-items:center;gap:8px;"><div style="width:10px;height:10px;border-radius:2px;background:#ccc;flex-shrink:0;"></div><span style="font-family:Inter,sans-serif;font-size:11px;font-weight:300;color:#555;">Architectural press <strong style="font-weight:600;color:#111;margin-left:4px;">1</strong></span></div>
+        </div>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 2: COLOUR -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s2">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--teal);">02 / Chromatic</div><div class="sec-title">COLOUR FAMILIES</div></div>
+    <div class="sec-desc">Cool steel and acid green dominate. The palette of the threshold, clinical and dissolving simultaneously.</div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-label" style="color:var(--teal);">Frequency / images containing colour family</div>
+      <div class="bar-row"><div class="br-label">Cool steel / blue-grey</div><div class="br-track"><div class="br-fill" style="--w:85%;background:#4a7fa5;"></div></div><div class="br-num" style="color:#7ba7c9;">23</div></div>
+      <div class="bar-row"><div class="br-label">Desaturated grey</div><div class="br-track"><div class="br-fill" style="--w:74%;background:#a8a69e;"></div></div><div class="br-num" style="color:#a8a69e;">20</div></div>
+      <div class="bar-row"><div class="br-label">Bleached white / ivory</div><div class="br-track"><div class="br-fill" style="--w:59%;background:#d6d2ca;"></div></div><div class="br-num" style="color:#d6d2ca;">16</div></div>
+      <div class="bar-row"><div class="br-label">Acid / lime green</div><div class="br-track"><div class="br-fill" style="--w:56%;background:#7a9e3b;"></div></div><div class="br-num" style="color:#97b864;">15</div></div>
+      <div class="bar-row"><div class="br-label">Warm amber / ochre</div><div class="br-track"><div class="br-fill" style="--w:48%;background:#c8883a;"></div></div><div class="br-num" style="color:#c8a96e;">13</div></div>
+      <div class="bar-row"><div class="br-label">Deep teal / dark green</div><div class="br-track"><div class="br-fill" style="--w:37%;background:#3a7878;"></div></div><div class="br-num" style="color:#4e8a74;">10</div></div>
+      <div class="bar-row"><div class="br-label">Orange-red / brick</div><div class="br-track"><div class="br-fill" style="--w:30%;background:#b05a3a;"></div></div><div class="br-num" style="color:#c47a5a;">8</div></div>
+      <div class="pull">"Cool and clinical, warm and dissolving. The palette of the threshold."</div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--teal);">Collective palette extract</div>
+      <div class="swatch-col">
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#4a7fa5;"></div><div class="swatch" style="width:50px;background:#7aa4be;"></div><div class="swatch" style="width:32px;background:#b0cedd;"></div><span class="sw-label">Steel / blue-grey</span></div>
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#a8a69e;"></div><div class="swatch" style="width:50px;background:#c4c2ba;"></div><div class="swatch" style="width:32px;background:#e0ddd6;"></div><span class="sw-label">Desaturated grey</span></div>
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#7a9e3b;"></div><div class="swatch" style="width:50px;background:#a8c070;"></div><div class="swatch" style="width:32px;background:#d0e4a8;"></div><span class="sw-label">Acid / lime green</span></div>
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#c8883a;"></div><div class="swatch" style="width:50px;background:#d8aa70;"></div><div class="swatch" style="width:32px;background:#f0dcc0;"></div><span class="sw-label">Warm amber / ochre</span></div>
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#3a7878;"></div><div class="swatch" style="width:50px;background:#6aa0a0;"></div><div class="swatch" style="width:32px;background:#b8d8d8;"></div><span class="sw-label">Deep teal</span></div>
+        <div class="swatch-row"><div class="swatch" style="width:70px;background:#b05a3a;"></div><div class="swatch" style="width:50px;background:#cc8868;"></div><div class="swatch" style="width:32px;background:#e8c8b8;"></div><span class="sw-label">Orange-red / brick</span></div>
+      </div>
+      <div style="margin-top:20px;">
+        <svg viewBox="0 0 300 130" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <!-- Steel -->
+          <rect x="0" y="4"  width="255" height="12" rx="2" fill="#4a7fa5" opacity="0.8"/>
+          <text x="260" y="14" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#4a7fa5">23</text>
+          <!-- Grey -->
+          <rect x="0" y="22" width="211" height="12" rx="2" fill="#a8a69e" opacity="0.8"/>
+          <text x="216" y="32" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#888">20</text>
+          <!-- White -->
+          <rect x="0" y="40" width="168" height="12" rx="2" fill="#c8c4bc" opacity="0.8"/>
+          <text x="173" y="50" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#888">16</text>
+          <!-- Green -->
+          <rect x="0" y="58" width="160" height="12" rx="2" fill="#7a9e3b" opacity="0.8"/>
+          <text x="165" y="68" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#7a9e3b">15</text>
+          <!-- Amber -->
+          <rect x="0" y="76" width="137" height="12" rx="2" fill="#c8883a" opacity="0.8"/>
+          <text x="142" y="86" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#c8883a">13</text>
+          <!-- Teal -->
+          <rect x="0" y="94" width="106" height="12" rx="2" fill="#3a7878" opacity="0.8"/>
+          <text x="111" y="104" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#3a7878">10</text>
+          <!-- Terracotta -->
+          <rect x="0" y="112" width="85"  height="12" rx="2" fill="#b05a3a" opacity="0.8"/>
+          <text x="90"  y="122" font-family="Roboto,sans-serif" font-weight="900" font-size="11" fill="#b05a3a">8</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 3: SPACE -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s3">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--amber);">03 / Spatial</div><div class="sec-title">SPACE &amp; COMPOSITION</div></div>
+    <div class="sec-desc">81% use a strong vanishing-point composition. 14 of 27 images contain no human figure.</div>
+  </div>
+  <div class="g3">
+    <div class="card">
+      <div class="card-label" style="color:var(--amber);">Spatial typologies</div>
+      <svg id="radar-svg" viewBox="0 0 300 300" width="100%" style="display:block;max-height:170px;max-width:100%;"></svg>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--amber);">Perspectival composition type</div>
+      <div class="bar-row"><div class="br-label">Strong vanishing-point</div><div class="br-track"><div class="br-fill" style="--w:100%;background:var(--amber);"></div></div><div class="br-num" style="color:var(--amber);">22</div></div>
+      <div class="bar-row"><div class="br-label">Overhead / bird's-eye</div><div class="br-track"><div class="br-fill" style="--w:27%;background:var(--amber);opacity:0.6;"></div></div><div class="br-num" style="color:var(--amber);">6</div></div>
+      <div class="bar-row"><div class="br-label">Flat / frontal plane</div><div class="br-track"><div class="br-fill" style="--w:18%;background:var(--amber);opacity:0.4;"></div></div><div class="br-num" style="color:var(--amber);">4</div></div>
+      <div class="bar-row"><div class="br-label">Worm's-eye / upshot</div><div class="br-track"><div class="br-fill" style="--w:14%;background:var(--amber);opacity:0.3;"></div></div><div class="br-num" style="color:var(--amber);">3</div></div>
+      <div style="margin-top:24px;">
+        <div class="card-label" style="color:var(--amber);">Spatial mood / scale</div>
+        <div class="bar-row"><div class="br-label">Corridor / tunnel</div><div class="br-track"><div class="br-fill" style="--w:100%;background:var(--teal);"></div></div><div class="br-num" style="color:var(--teal);">10</div></div>
+        <div class="bar-row"><div class="br-label">Vast interior void</div><div class="br-track"><div class="br-fill" style="--w:70%;background:var(--teal);opacity:0.8;"></div></div><div class="br-num" style="color:var(--teal);">7</div></div>
+        <div class="bar-row"><div class="br-label">Intimate / room-scale</div><div class="br-track"><div class="br-fill" style="--w:60%;background:var(--teal);opacity:0.6;"></div></div><div class="br-num" style="color:var(--teal);">6</div></div>
+        <div class="bar-row"><div class="br-label">Open exterior / sky</div><div class="br-track"><div class="br-fill" style="--w:40%;background:var(--teal);opacity:0.4;"></div></div><div class="br-num" style="color:var(--teal);">4</div></div>
+        <div class="bar-row"><div class="br-label">Ambiguous / abstract</div><div class="br-track"><div class="br-fill" style="--w:70%;background:var(--teal);opacity:0.3;"></div></div><div class="br-num" style="color:var(--teal);">7</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--purple);">Emptiness index / human presence</div>
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Each circle = 1 image</div>
+      <div class="dot-grid" id="dot-grid"></div>
+      <div>
+        <div class="e-row"><div class="e-dot" style="background:var(--purple);"></div><span class="e-label">No figure present</span><span class="e-num" style="color:var(--purple);">14</span></div>
+        <div class="e-row"><div class="e-dot" style="background:var(--purple);opacity:0.3;"></div><span class="e-label">Single distant figure</span><span class="e-num">7</span></div>
+        <div class="e-row" style="border-bottom:none;"><div class="e-dot" style="border:2px solid var(--purple);"></div><span class="e-label">Figure present / multiple</span><span class="e-num">6</span></div>
+      </div>
+      <div class="pull">"The majority of spaces are uninhabited. Solitude is not incidental, it is the condition."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 4: MOTIFS -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s4">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--coral);">04 / Motifs</div><div class="sec-title">RECURRING MOTIFS</div></div>
+    <div class="sec-desc">Artificial light appears in 85% of all images. Solitude and repetition are the dominant conceptual registers.</div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-label" style="color:var(--coral);">Architectural motifs</div>
+      <div class="bar-row"><div class="br-label">Artificial light source</div><div class="br-track"><div class="br-fill" style="--w:100%;background:var(--coral);"></div></div><div class="br-num" style="color:var(--coral);">23</div></div>
+      <div class="bar-row"><div class="br-label">Corridor / passage</div><div class="br-track"><div class="br-fill" style="--w:43%;background:var(--coral);opacity:0.8;"></div></div><div class="br-num" style="color:var(--coral);">10</div></div>
+      <div class="bar-row"><div class="br-label">Grid ceiling / perforation</div><div class="br-track"><div class="br-fill" style="--w:35%;background:var(--coral);opacity:0.65;"></div></div><div class="br-num" style="color:var(--coral);">8</div></div>
+      <div class="bar-row"><div class="br-label">Curved / organic form</div><div class="br-track"><div class="br-fill" style="--w:30%;background:var(--coral);opacity:0.5;"></div></div><div class="br-num" style="color:var(--coral);">7</div></div>
+      <div class="bar-row"><div class="br-label">Reflective surface / pool</div><div class="br-track"><div class="br-fill" style="--w:26%;background:var(--coral);opacity:0.4;"></div></div><div class="br-num" style="color:var(--coral);">6</div></div>
+      <div class="bar-row"><div class="br-label">Staircase / vertical axis</div><div class="br-track"><div class="br-fill" style="--w:22%;background:var(--coral);opacity:0.3;"></div></div><div class="br-num" style="color:var(--coral);">5</div></div>
+      <div class="pull">"Light is the one constant. Not natural light, but manufactured. The curated glow of the non-place."</div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--blue);">Conceptual motifs</div>
+      <div class="bar-row"><div class="br-label">Solitude / isolation</div><div class="br-track"><div class="br-fill" style="--w:100%;background:var(--blue);"></div></div><div class="br-num" style="color:var(--blue);">22</div></div>
+      <div class="bar-row"><div class="br-label">Repetition / seriality</div><div class="br-track"><div class="br-fill" style="--w:86%;background:var(--blue);opacity:0.9;"></div></div><div class="br-num" style="color:var(--blue);">19</div></div>
+      <div class="bar-row"><div class="br-label">Threshold / transition</div><div class="br-track"><div class="br-fill" style="--w:82%;background:var(--blue);opacity:0.75;"></div></div><div class="br-num" style="color:var(--blue);">18</div></div>
+      <div class="bar-row"><div class="br-label">Scale distortion</div><div class="br-track"><div class="br-fill" style="--w:55%;background:var(--blue);opacity:0.6;"></div></div><div class="br-num" style="color:var(--blue);">12</div></div>
+      <div class="bar-row"><div class="br-label">Motion blur / speed</div><div class="br-track"><div class="br-fill" style="--w:41%;background:var(--blue);opacity:0.45;"></div></div><div class="br-num" style="color:var(--blue);">9</div></div>
+      <div class="bar-row"><div class="br-label">Inversion / gravity break</div><div class="br-track"><div class="br-fill" style="--w:14%;background:var(--blue);opacity:0.3;"></div></div><div class="br-num" style="color:var(--blue);">3</div></div>
+      <div class="pull">"Repetition as a form of hypnosis. The serial column, the tiled ceiling, the corridor that never ends."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 5: MEDIA -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s5">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--teal);">05 / Format</div><div class="sec-title">MEDIA TYPES</div></div>
+    <div class="sec-desc">Architecture dominates at 52%. Electronic music covers form the richest secondary strand. Spaces heard but never entered.</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;min-width:0;">
+    <div class="card">
+      <div class="card-label" style="color:var(--teal);">Format breakdown</div>
+      <svg id="format-svg" viewBox="0 0 260 210" width="100%" style="display:block;margin-top:12px;max-width:100%;"></svg>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+    <div class="card">
+      <div class="card-label" style="color:var(--purple);">Geographic origins</div>
+      <div class="geo-grid">
+        <div class="geo-item"><div class="geo-name">UK / Europe</div><div class="geo-num" style="color:var(--purple);">9</div></div>
+        <div class="geo-item"><div class="geo-name">Japan</div><div class="geo-num" style="color:var(--purple);">7</div></div>
+        <div class="geo-item"><div class="geo-name">USA</div><div class="geo-num" style="color:var(--purple);">5</div></div>
+        <div class="geo-item"><div class="geo-name">Latin America</div><div class="geo-num">2</div></div>
+        <div class="geo-item"><div class="geo-name">East Asia (non-JP)</div><div class="geo-num">2</div></div>
+        <div class="geo-item"><div class="geo-name">Global / unclear</div><div class="geo-num">2</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label" style="color:var(--amber);">Music subgenres / cover art</div>
+      <div class="pill-wrap">
+        <span class="pill pill-purple">Electronic / House ×6</span>
+        <span class="pill pill-teal">Downtempo / Ambient ×4</span>
+        <span class="pill pill-dim">Indie / Alt ×2</span>
+        <span class="pill pill-dim">Pop ×2</span>
+      </div>
+      <div class="pull" style="margin-top:24px;">"The electronic music cover as surrogate architecture. Spaces you can hear but never enter."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────────── -->
+<!-- SECTION 6: CRITICAL READING -->
+<!-- ─────────────────────────────────────── -->
+<section class="page-section" id="s6" style="border-bottom:none;">
+  <div class="sec-header">
+    <div><div class="sec-index" style="color:var(--purple);">06 / Reading</div><div class="sec-title">CRITICAL READING</div></div>
+    <div class="sec-desc">"Architecture as the container of the unresolved. Spatial logic at the edge of dream."</div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-label" style="color:var(--purple);">Four thematic readings</div>
+      <div class="t-block"><div class="t-num">I</div><div><div class="t-title">Architecture as uncanny container</div><div class="t-text">Not spaces for dwelling but for passing through. Marc Augé's non-place: the airport, the motorway, the hotel corridor. Translated into a visual language closer to dream-logic than sociological taxonomy.</div></div></div>
+      <div class="t-block"><div class="t-num">II</div><div><div class="t-title">Music cover as surrogate architecture</div><div class="t-text">Album covers here do not illustrate the music / they are its spatial imagination made visible. The cover as portal, a frame around a space you can hear but never enter.</div></div></div>
+      <div class="t-block"><div class="t-num">III</div><div><div class="t-title">The body as intrusion</div><div class="t-text">Where figures appear, the body reads not as subject but as scale device, a ghost haunting a space that doesn't need it. The spaces preexist the inhabitants and will persist after them.</div></div></div>
+      <div class="t-block"><div class="t-num">IV</div><div><div class="t-title">Y2K and the aestheticisation of rationality</div><div class="t-text">1997–2004: smooth curves, brushed steel, ice-blue whites, acid greens. A moment when the rational grid was simultaneously celebrated and dissolved into sensation.</div></div></div>
+    </div>
+    <div>
+      <div class="card-label" style="color:var(--teal);padding:0 0 12px;border-bottom:1px solid var(--border);margin-bottom:16px;">Image clusters</div>
+      <div class="g2" style="gap:12px;">
+        <div class="cluster"><div class="c-name">Corridor cluster</div><div class="c-items">Church of Al Green · M-Premier · Ride the Underground · Tresor 142 · AA Files 29</div><div class="c-tags"><span class="ctag">deep recession</span><span class="ctag">no exit</span></div></div>
+        <div class="cluster"><div class="c-name">Acid green cluster</div><div class="c-items">Tontas Promesas · Vigilance · Star Garden · Mavi Müzik · Travis EP</div><div class="c-tags"><span class="ctag">Y2K hue</span><span class="ctag">pool light</span></div></div>
+        <div class="cluster"><div class="c-name">White void cluster</div><div class="c-items">North Residence · Sharp Aquos · Millennium Residence · Mars Salon · Out Patients 2</div><div class="c-tags"><span class="ctag">bleached</span><span class="ctag">clinical</span></div></div>
+        <div class="cluster"><div class="c-name">Figure in space</div><div class="c-items">Kate Moss · Angela Lindvall · On the Run · Dutch Mag · I-D Sept 2001</div><div class="c-tags"><span class="ctag">solitary</span><span class="ctag">scale ref</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<script>
+(function(){
+
+/* ── DOT GRID ── */
+const dg = document.getElementById('dot-grid');
+[...Array(14).fill('empty'),...Array(7).fill('partial'),...Array(6).fill('present')].forEach(t=>{
+  const d=document.createElement('div');
+  d.className='dot '+t;
+  d.style.transform = 'scale(1)'; // visible by default
+  dg.appendChild(d);
+});
+
+/* ── CHART HELPERS ── */
+
+/* ── TIMELINE ── */
+/* ── MEDIA DONUT ── */
+/* ── COLOUR HORIZONTAL BAR ── */
+/* ── RADAR ── */
+/* ── FORMAT CHART ── */
+/* ── SCROLL REVEAL + BAR + SVG ANIMATIONS ── */
+// Store final values on load so reset never loses them
+document.querySelectorAll('.stat-val, .br-num, .e-num, .geo-num').forEach(el => {
+  const v = parseInt(el.textContent);
+  if (!isNaN(v)) el.setAttribute('data-final', v);
+});
+
+function animateSection(section) {
+  section.classList.add('visible');
+  section.classList.remove('animating-in');
+  void section.offsetWidth;
+  section.classList.add('animating-in');
+
+  // Animate br-fill bars — reset then grow
+  section.querySelectorAll('.br-fill').forEach((el, i) => {
+    const styleAttr = el.getAttribute('style') || '';
+    const m = styleAttr.match(/--w:\s*([^;]+)/);
+    const w = el.style.getPropertyValue('--w') || (m ? m[1] : null);
+    if (w) {
+      el.style.transition = 'none';
+      el.style.width = '0px';
+      setTimeout(() => {
+        el.style.transition = 'width 1s cubic-bezier(0.16,1,0.3,1)';
+        el.style.width = w.trim();
+      }, 50 + i * 60);
+    }
+  });
+
+  // Animate dots — bounce in
+  section.querySelectorAll('.dot').forEach((dot, i) => {
+    dot.style.transform = 'scale(0)';
+    dot.style.transition = 'none';
+    setTimeout(() => {
+      dot.style.transition = 'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+      dot.style.transform = 'scale(1)';
+    }, 50 + i * 18);
+  });
+
+  // Animate SVG timeline bars (rects with class tbar)
+  section.querySelectorAll('svg rect.tbar').forEach((rect, i) => {
+    rect.style.transformOrigin = 'bottom';
+    rect.style.transform = 'scaleY(0)';
+    setTimeout(() => {
+      rect.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
+      rect.style.transform = 'scaleY(1)';
+    }, 50 + i * 35);
+  });
+
+  // Animate radar polygon stroke
+  section.querySelectorAll('svg polygon[stroke="#4a7fa5"]').forEach(poly => {
+    const len = poly.getTotalLength ? poly.getTotalLength() : 600;
+    poly.style.strokeDasharray = len;
+    poly.style.strokeDashoffset = len;
+    poly.style.transition = 'none';
+    setTimeout(() => {
+      poly.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s';
+      poly.style.strokeDashoffset = '0';
+    }, 100);
+  });
+
+  // Animate pulls and labels
+  section.querySelectorAll('.pull, .card-label, .sec-index').forEach((el, i) => {
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.style.transition = 'opacity 0.6s ease';
+      el.style.opacity = '1';
+    }, 150 + i * 30);
+  });
+
+  // Count up numbers — read from data-final so reset never corrupts the value
+  section.querySelectorAll('.stat-val, .br-num, .e-num, .geo-num').forEach(el => {
+    const finalVal = parseInt(el.getAttribute('data-final') || el.textContent);
+    if (isNaN(finalVal) || finalVal > 100) return;
+    el.textContent = '0';
+    const duration = 800;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(eased * finalVal);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = finalVal;
+    }
+    setTimeout(() => requestAnimationFrame(step), 200);
+  });
+}
+
+// Hero fade in
+const hero = document.querySelector('.hero');
+if (hero) {
+  hero.style.opacity = '0';
+  setTimeout(() => {
+    hero.style.transition = 'opacity 0.9s ease';
+    hero.style.opacity = '1';
+  }, 100);
+  // Animate hero stat vals too
+  setTimeout(() => {
+    hero.querySelectorAll('.stat-val').forEach(el => {
+      const finalVal = parseInt(el.getAttribute('data-final') || el.textContent);
+      if (isNaN(finalVal) || finalVal > 100) return;
+      el.textContent = '0';
+      const duration = 1000;
+      const start = performance.now();
+      function step(now) {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.round(eased * finalVal);
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = finalVal;
+      }
+      requestAnimationFrame(step);
+    });
+  }, 400);
+}
+
+// Track which sections have been seen and whether they've fully exited
+const sectionState = new Map();
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    const state = sectionState.get(e.target) || { animated: false, fullyOut: true };
+
+    if (e.isIntersecting) {
+      // Only re-animate if it has fully left the viewport since last animation
+      if (state.fullyOut) {
+        animateSection(e.target);
+        state.animated = true;
+        state.fullyOut = false;
+      }
+    } else {
+      // Only mark as fully out if intersection ratio is 0 (completely gone)
+      if (e.intersectionRatio === 0) {
+        state.fullyOut = true;
+      }
+    }
+    sectionState.set(e.target, state);
+  });
+}, { threshold: [0, 0.08, 0.15], rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.page-section').forEach(s => {
+  sectionState.set(s, { animated: false, fullyOut: true });
+  io.observe(s);
+});
+
+// ── TOOLTIP ON HOVER for bar rows ──
+document.querySelectorAll('.bar-row').forEach(row => {
+  const label = row.querySelector('.br-label');
+  const num = row.querySelector('.br-num');
+  if (!label || !num) return;
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:11px;font-weight:300;padding:5px 10px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity 0.15s ease;z-index:999;white-space:nowrap;';
+  document.body.appendChild(tip);
+  row.addEventListener('mouseenter', e => {
+    tip.textContent = label.textContent + ': ' + num.textContent + ' images';
+    tip.style.opacity = '1';
+  });
+  row.addEventListener('mousemove', e => {
+    tip.style.left = (e.clientX + 12) + 'px';
+    tip.style.top  = (e.clientY - 28) + 'px';
+  });
+  row.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+});
+
+// ── TOOLTIP ON HOVER for dots ──
+const dotLabels = ['No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'No figure', 'Distant figure', 'Distant figure', 'Distant figure', 'Distant figure', 'Distant figure', 'Distant figure', 'Distant figure', 'Figure present', 'Figure present', 'Figure present', 'Figure present', 'Figure present', 'Figure present'];
+document.querySelectorAll('.dot').forEach((dot, i) => {
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:11px;font-weight:300;padding:5px 10px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity 0.15s ease;z-index:999;white-space:nowrap;';
+  tip.textContent = dotLabels[i] || '';
+  document.body.appendChild(tip);
+  dot.addEventListener('mouseenter', e => { tip.style.opacity = '1'; });
+  dot.addEventListener('mousemove', e => {
+    tip.style.left = (e.clientX + 12) + 'px';
+    tip.style.top  = (e.clientY - 28) + 'px';
+  });
+  dot.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+});
+
+// ── TOOLTIP for SVG donut slices ──
+const donutLabels = {
+  '#4a7fa5': 'Architecture / interior — 14',
+  '#7a9e3b': 'Music cover art — 8',
+  '#c8883a': 'Fashion / editorial — 4',
+};
+document.querySelectorAll('svg path').forEach(path => {
+  const fill = path.getAttribute('fill');
+  if (!donutLabels[fill]) return;
+  const tip = document.createElement('div');
+  tip.style.cssText = 'position:fixed;background:#111;color:#fff;font-family:Inter,sans-serif;font-size:11px;font-weight:300;padding:5px 10px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity 0.15s ease;z-index:999;white-space:nowrap;';
+  tip.textContent = donutLabels[fill];
+  document.body.appendChild(tip);
+  path.style.cursor = 'pointer';
+  path.addEventListener('mouseenter', () => { tip.style.opacity = '1'; });
+  path.addEventListener('mousemove', e => {
+    tip.style.left = (e.clientX + 12) + 'px';
+    tip.style.top  = (e.clientY - 28) + 'px';
+  });
+  path.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+});
+
+// ── DRAW DONUT ──
+(function() {
+  const svg = document.getElementById('donut-svg');
+  if (!svg) return;
+  const cx = 80, cy = 80, R = 62, r = 38;
+  const data = [
+    { v: 14, color: '#4a7fa5' },
+    { v: 8,  color: '#7a9e3b' },
+    { v: 4,  color: '#c8883a' },
+    { v: 1,  color: '#d0d0d0' }
+  ];
+  const total = data.reduce((s, d) => s + d.v, 0);
+  let angle = -Math.PI / 2;
+  const ns = 'http://www.w3.org/2000/svg';
+
+  data.forEach(d => {
+    const sweep = (d.v / total) * 2 * Math.PI;
+    const x1 = cx + R * Math.cos(angle);
+    const y1 = cy + R * Math.sin(angle);
+    const x2 = cx + R * Math.cos(angle + sweep);
+    const y2 = cy + R * Math.sin(angle + sweep);
+    const xi1 = cx + r * Math.cos(angle + sweep);
+    const yi1 = cy + r * Math.sin(angle + sweep);
+    const xi2 = cx + r * Math.cos(angle);
+    const yi2 = cy + r * Math.sin(angle);
+    const large = sweep > Math.PI ? 1 : 0;
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${xi1},${yi1} A${r},${r} 0 ${large},0 ${xi2},${yi2} Z`);
+    path.setAttribute('fill', d.color);
+    path.style.transition = 'opacity 0.2s, filter 0.2s';
+    path.style.cursor = 'pointer';
+    path.addEventListener('mouseenter', () => { path.style.filter = 'brightness(1.15)'; path.style.opacity = '0.95'; });
+    path.addEventListener('mouseleave', () => { path.style.filter = ''; path.style.opacity = ''; });
+    svg.appendChild(path);
+    angle += sweep;
+  });
+
+  // centre label
+  const t1 = document.createElementNS(ns, 'text');
+  t1.setAttribute('x', cx); t1.setAttribute('y', cy - 4);
+  t1.setAttribute('text-anchor', 'middle');
+  t1.setAttribute('font-family', 'Roboto,sans-serif');
+  t1.setAttribute('font-weight', '900');
+  t1.setAttribute('font-size', '22');
+  t1.setAttribute('fill', '#111');
+  t1.textContent = '27';
+  svg.appendChild(t1);
+
+  const t2 = document.createElementNS(ns, 'text');
+  t2.setAttribute('x', cx); t2.setAttribute('y', cy + 12);
+  t2.setAttribute('text-anchor', 'middle');
+  t2.setAttribute('font-family', 'Inter,sans-serif');
+  t2.setAttribute('font-size', '9');
+  t2.setAttribute('fill', '#999');
+  t2.textContent = 'images';
+  svg.appendChild(t2);
+})();
+
+// ── DRAW FORMAT BARS ──
+(function() {
+  const svg = document.getElementById('format-svg');
+  if (!svg) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const data = [
+    { label: 'Architecture', v: 14 },
+    { label: 'Music',        v: 8  },
+    { label: 'Fashion',      v: 4  },
+    { label: 'Press',        v: 1  }
+  ];
+  const maxV = 14;
+  const chartH = 140, baseY = 160, barW = 36, gap = 30, startX = 40;
+  const colors = ['#7a9e3b','rgba(122,158,59,0.7)','rgba(122,158,59,0.45)','rgba(122,158,59,0.2)'];
+
+  // gridlines
+  [0,2,6,10,14].forEach(v => {
+    const y = baseY - (v / maxV) * chartH;
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', startX - 8); line.setAttribute('x2', 260);
+    line.setAttribute('y1', y); line.setAttribute('y2', y);
+    line.setAttribute('stroke', v === 0 ? '#ccc' : '#f0f0f0');
+    line.setAttribute('stroke-width', v === 0 ? '1' : '0.5');
+    svg.appendChild(line);
+
+    const t = document.createElementNS(ns, 'text');
+    t.setAttribute('x', startX - 10); t.setAttribute('y', y + 3);
+    t.setAttribute('text-anchor', 'end');
+    t.setAttribute('font-family', 'Inter,sans-serif');
+    t.setAttribute('font-size', '9');
+    t.setAttribute('fill', '#bbb');
+    t.textContent = v;
+    svg.appendChild(t);
+  });
+
+  data.forEach((d, i) => {
+    const x = startX + i * (barW + gap);
+    const barH = (d.v / maxV) * chartH;
+    const y = baseY - barH;
+
+    const rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('width', barW);
+    rect.setAttribute('y', baseY); rect.setAttribute('height', 0);
+    rect.setAttribute('fill', colors[i]);
+    rect.setAttribute('rx', '2');
+    rect.style.transition = 'y 0.7s cubic-bezier(0.16,1,0.3,1), height 0.7s cubic-bezier(0.16,1,0.3,1)';
+    svg.appendChild(rect);
+
+    // animate on scroll
+    const obs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setTimeout(() => {
+          rect.setAttribute('y', y);
+          rect.setAttribute('height', barH);
+        }, 100 + i * 120);
+        obs.disconnect();
+      }
+    }, { threshold: 0.1 });
+    obs.observe(svg);
+
+    // value label
+    const val = document.createElementNS(ns, 'text');
+    val.setAttribute('x', x + barW / 2); val.setAttribute('y', y - 5);
+    val.setAttribute('text-anchor', 'middle');
+    val.setAttribute('font-family', 'Roboto,sans-serif');
+    val.setAttribute('font-weight', '900');
+    val.setAttribute('font-size', '13');
+    val.setAttribute('fill', colors[0]);
+    val.textContent = d.v;
+    svg.appendChild(val);
+
+    // x label
+    const lbl = document.createElementNS(ns, 'text');
+    lbl.setAttribute('x', x + barW / 2); lbl.setAttribute('y', baseY + 14);
+    lbl.setAttribute('text-anchor', 'middle');
+    lbl.setAttribute('font-family', 'Inter,sans-serif');
+    lbl.setAttribute('font-size', '9');
+    lbl.setAttribute('fill', '#888');
+    lbl.textContent = d.label;
+    if (d.label === 'Press') lbl.setAttribute('x', x + barW / 2 - 2);
+    svg.appendChild(lbl);
+  });
+})();
+
+// ── DRAW RADAR ──
+(function() {
+  const svg = document.getElementById('radar-svg');
+  if (!svg) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const labels = ['Corridor','Void','Room-scale','Sky','Abstract','Overhead','Industrial'];
+  const values = [10, 7, 6, 4, 7, 6, 5];
+  const maxV = 10;
+  const cx = 150, cy = 155, R = 78;
+  const n = labels.length;
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2;
+
+  function pt(i, radius) {
+    const a = startAngle + i * angleStep;
+    return [cx + radius * Math.cos(a), cy + radius * Math.sin(a)];
+  }
+
+  // Grid rings
+  [0.25, 0.5, 0.75, 1].forEach(scale => {
+    const pts = Array.from({length: n}, (_, i) => pt(i, R * scale).join(',')).join(' ');
+    const poly = document.createElementNS(ns, 'polygon');
+    poly.setAttribute('points', pts);
+    poly.setAttribute('fill', 'none');
+    poly.setAttribute('stroke', '#ebebeb');
+    poly.setAttribute('stroke-width', '1');
+    svg.appendChild(poly);
+  });
+
+  // Axis lines
+  for (let i = 0; i < n; i++) {
+    const [x, y] = pt(i, R);
+    const line = document.createElementNS(ns, 'line');
+    line.setAttribute('x1', cx); line.setAttribute('y1', cy);
+    line.setAttribute('x2', x); line.setAttribute('y2', y);
+    line.setAttribute('stroke', '#e8e8e8');
+    line.setAttribute('stroke-width', '0.5');
+    svg.appendChild(line);
+  }
+
+  // Data polygon
+  const dataPts = values.map((v, i) => pt(i, (v / maxV) * R).join(',')).join(' ');
+  const fill = document.createElementNS(ns, 'polygon');
+  fill.setAttribute('points', dataPts);
+  fill.setAttribute('fill', 'rgba(74,127,165,0.15)');
+  fill.setAttribute('stroke', '#4a7fa5');
+  fill.setAttribute('stroke-width', '1.5');
+  fill.setAttribute('stroke-linejoin', 'round');
+  svg.appendChild(fill);
+
+  // Data points
+  values.forEach((v, i) => {
+    const [x, y] = pt(i, (v / maxV) * R);
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', x); circle.setAttribute('cy', y); circle.setAttribute('r', '3');
+    circle.setAttribute('fill', '#4a7fa5');
+    svg.appendChild(circle);
+  });
+
+  // Labels
+  labels.forEach((label, i) => {
+    const [x, y] = pt(i, R + 16);
+    const text = document.createElementNS(ns, 'text');
+    text.setAttribute('x', x); text.setAttribute('y', y);
+    // Adjust anchor so labels stay within viewbox
+    let anchor = 'middle';
+    if (x < cx - 8) anchor = 'end';
+    else if (x > cx + 8) anchor = 'start';
+    text.setAttribute('text-anchor', anchor);
+    // Clamp x position so labels don't overflow viewbox
+    const clampedX = Math.max(10, Math.min(290, parseFloat(x)));
+    text.setAttribute('x', clampedX);
+    text.setAttribute('dominant-baseline', 'middle');
+    text.setAttribute('font-family', 'Inter,sans-serif');
+    text.setAttribute('font-size', '9');
+    text.setAttribute('fill', '#666');
+    text.textContent = label;
+    svg.appendChild(text);
+  });
+})();
+
+
+})();
+</script>
+</body>
+</html>
